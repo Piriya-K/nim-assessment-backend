@@ -7,4 +7,7 @@ menuRouter.get("/", menuController.getAll);
 menuRouter.get("/:id", menuController.getOne);
 menuRouter.post("/", menuController.create);
 
+// Menu Routes - Update menu item
+menuRouter.put("/:id", menuController.update);
+
 module.exports = menuRouter;
