@@ -82,6 +82,73 @@ const getByStatus = async (status) => {
   return orders;
 };
 
+const getTotalSales = async (reqBody) => {
+  let matchStage = null;
+
+  // Parse startDate and endDate from reqBody if provided
+  if (reqBody.startDate && reqBody.endDate) {
+    const { startDate, endDate } = reqBody;
+    const [startYear, startMonth] = startDate.split("-");
+    const [endYear, endMonth] = endDate.split("-");
+
+    matchStage = {
+      $match: {
+        createdAt: {
+          $gte: new Date(startYear, startMonth - 1),
+          $lte: new Date(endYear, endMonth, 0, 23, 59, 59, 999)
+        }
+      }
+    };
+  }
+
+  // Define the pipeline array
+  const pipeline = [
+    // Add the match stage conditionally based on startDate and endDate
+    ...(matchStage ? [matchStage] : []),
+
+    // Unwind the items array to work with individual items
+    { $unwind: "$items" },
+
+    // Perform a $lookup to join with MenuItems on the _id field
+    {
+      $lookup: {
+        from: "menuitems",
+        localField: "items.item", // field in Order.items to join on
+        foreignField: "_id", // field in MenuItems to join on
+        as: "joinedMenuItem"
+      }
+    },
+
+    // Unwind the array created by $lookup
+    { $unwind: "$joinedMenuItem" },
+
+    // Project to compute the multiplication and add to a new field
+    {
+      $project: {
+        multipliedResult: {
+          $multiply: ["$items.quantity", "$joinedMenuItem.price"]
+        }
+      }
+    },
+
+    // Group to compute the sum across all documents
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: "$multipliedResult" }
+      }
+    }
+  ];
+
+  const totalSales = await Order.aggregate(pipeline);
+
+  // Formatting totalSales
+  const formattedTotalSales =
+    totalSales.length > 0 ? totalSales[0].totalSales : 0;
+
+  return { total: Number(formattedTotalSales.toFixed(2)) };
+};
+
 module.exports = {
   getAll,
   getOne,
@@ -89,5 +156,6 @@ module.exports = {
   update,
   remove,
   getByStatus,
+  getTotalSales,
   Order
 };
