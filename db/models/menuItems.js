@@ -51,4 +51,42 @@ const create = async (body) => {
   }
 };
 
-module.exports = { getAll, getOne, create, MenuItems };
+const update = async (id, body) => {
+  try {
+    const menuItem = await MenuItems.findByIdAndUpdate(id, body, { new: true });
+    return menuItem;
+  } catch (error) {
+    return error;
+  }
+};
+
+const remove = async (id) => {
+  try {
+    await MenuItems.findByIdAndDelete(id);
+    return id;
+  } catch (error) {
+    return error;
+  }
+};
+
+const getByQuery = async (query) => {
+  try {
+    const regex = new RegExp(query, "i");
+    const menuItem = await MenuItems.find({
+      $or: [{ name: { $regex: regex } }, { description: { $regex: regex } }]
+    });
+    return menuItem;
+  } catch (error) {
+    return error;
+  }
+};
+
+module.exports = {
+  getAll,
+  getOne,
+  create,
+  update,
+  remove,
+  getByQuery,
+  MenuItems
+};
