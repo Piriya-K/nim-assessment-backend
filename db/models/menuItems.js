@@ -1,30 +1,29 @@
 const mongoose = require("../db.js");
 
-const menuItemsSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true
+const menuItemsSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    price: {
+      type: Number,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
+    },
+    imageUrl: {
+      type: String
+    }
   },
-  price: {
-    type: Number,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  imageUrl: {
-    type: String
-  },
-  updatedAt: {
-    type: Date
-  }
-});
+  { timestamps: true }
+);
 menuItemsSchema.set("toJSON", {
   virtuals: true
 });
-// menu model
 const MenuItems = mongoose.model("MenuItems", menuItemsSchema);
 
 const getAll = async () => {
