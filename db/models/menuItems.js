@@ -56,8 +56,13 @@ const create = async (body) => {
 
 const update = async (id, body) => {
   try {
-    body.updatedAt = new Date();
-    const menuItem = await MenuItems.findByIdAndUpdate(id, body, { new: true });
+    const updatedData = {
+      ...body,
+      updatedAt: new Date()
+    };
+    const menuItem = await MenuItems.findByIdAndUpdate(id, updatedData, {
+      new: true
+    });
     return menuItem;
   } catch (error) {
     return error;
