@@ -16,6 +16,9 @@ const menuItemsSchema = new mongoose.Schema({
   },
   imageUrl: {
     type: String
+  },
+  updatedAt: {
+    type: Date
   }
 });
 menuItemsSchema.set("toJSON", {
@@ -53,6 +56,7 @@ const create = async (body) => {
 
 const update = async (id, body) => {
   try {
+    body.updatedAt = new Date();
     const menuItem = await MenuItems.findByIdAndUpdate(id, body, { new: true });
     return menuItem;
   } catch (error) {
